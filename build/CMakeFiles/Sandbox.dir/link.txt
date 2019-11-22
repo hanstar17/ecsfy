@@ -1,1 +1,0 @@
-/usr/bin/c++.exe -Wall -g  -Wl,--enable-auto-import CMakeFiles/Sandbox.dir/src/Main.cpp.o  -o ../bin/Sandbox.exe -Wl,--out-implib,../bin/libSandbox.dll.a -Wl,--major-image-version,0,--minor-image-version,0 

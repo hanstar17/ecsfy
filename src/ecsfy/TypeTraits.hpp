@@ -5,7 +5,7 @@
 #include <type_traits>
 #include <limits>
 
-namespace ecsfy {  
+namespace ecsfy {
 constexpr int CountBit(int n) {
   // 14 < 16 -> 4
   // 16 < 32 -> 5
@@ -23,8 +23,10 @@ constexpr int Sum(Ints... ints) {
   return (0 + ... + ints);
 }
 
-template <int _Index, int _Sum = 0, int _First, int... _Rest>
+template <int _Index, int _Sum, int _First, int... _Rest>
 constexpr int AccSum() {
+  constexpr int valueCount = sizeof...(_Rest) + 1;
+  static_assert(_Index < valueCount);
   if constexpr (_Index < 0)
     return _Sum;
   else if constexpr (_Index == 0)

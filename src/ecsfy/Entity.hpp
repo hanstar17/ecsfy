@@ -4,12 +4,14 @@
 namespace ecsfy {
 template <typename _Traits>
 struct Entity {
+ private:
   enum {
     kIndex,
     kTypeID,
     kGeneration
   };
 
+ public:
   using CompactType = CompactTuple<_Traits::MaxEntityCount, 
                                    _Traits::MaxTypeCount,
                                    _Traits::MaxGeneration>;

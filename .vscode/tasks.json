@@ -6,25 +6,16 @@
             "type": "shell",
             "label": "build a project (debug)",
             "dependsOn": [
-                "cmake (debug)",
-                "make (debug)",
+                "cmake install (debug)"
             ]
         },
         {
             "type": "shell",
-            "label": "cmake (debug)",
+            "label": "cmake install (debug)",
             "options": {
                 "cwd": "${workspaceRoot}/build"
             },
-            "command": "cmake --config debug .",
-        },
-        {
-            "type": "shell",
-            "label": "make (debug)",
-            "options": {
-                "cwd": "${workspaceRoot}/build"
-            },
-            "command": "make",
+            "command": "cmake --build . --config debug --target install",
         },
     ],
     "version": "2.0.0"

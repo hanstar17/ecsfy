@@ -10,4 +10,5 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -Wall)
 add_subdirectory(tests)
 
 # output settings
-install(TARGETS tests DESTINATIONS ${CMAKE_SOURCE_DIR}/bin)
+install(TARGETS tests DESTINATION
+  ${CMAKE_SOURCE_DIR}/bin)

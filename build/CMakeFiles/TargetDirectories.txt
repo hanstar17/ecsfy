@@ -1,3 +1,0 @@
-/cygdrive/c/Users/habit/Documents/Projects/ecsfy/build/CMakeFiles/rebuild_cache.dir
-/cygdrive/c/Users/habit/Documents/Projects/ecsfy/build/CMakeFiles/Sandbox.dir
-/cygdrive/c/Users/habit/Documents/Projects/ecsfy/build/CMakeFiles/edit_cache.dir
