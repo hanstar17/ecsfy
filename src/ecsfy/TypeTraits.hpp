@@ -5,11 +5,10 @@
 #include <type_traits>
 #include <limits>
 
+#include <iostream>
+
 namespace ecsfy {
 constexpr int CountBit(int n) {
-  // 14 < 16 -> 4
-  // 16 < 32 -> 5
-  // 1 < 2 -> 1
   int count = 0;
   while (n) {
     n >>= 1;
@@ -38,6 +37,7 @@ constexpr int AccSum() {
 template <int _Index, int _First, int... _Rest>
 constexpr int GetAt() {
   static_assert(_Index >= 0);
+  static_assert(_Index < sizeof...(_Rest) + 1);
   if constexpr (_Index == 0)
     return _First;
   else
@@ -66,25 +66,26 @@ struct CompactTuple {
     return GetAt<I, CountBit(_Values)...>();
   }
 
-  template<int I>
+  template<unsigned I>
   static constexpr UnderlyingType GetMax() {
-    constexpr UnderlyingType lshift = UnderlyingSize - GetLocation<I>() - GetLength<I>();
-    constexpr UnderlyingType rshift = UnderlyingSize - GetLength<I>();
-    return (std::numeric_limits<UnderlyingType>::max() << lshift) >> rshift;
+    constexpr int lshift = UnderlyingSize - GetLocation<I>() - GetLength<I>();
+    constexpr int rshift = UnderlyingSize - GetLength<I>();
+    return static_cast<UnderlyingType>(std::numeric_limits<UnderlyingType>::max() << lshift) >> rshift;
   }
 
-  template<int I>
+  template<unsigned I>
   UnderlyingType Get() const {
-    constexpr UnderlyingType lshift = UnderlyingSize - GetLocation<I>() - GetLength<I>();
-    constexpr UnderlyingType rshift = UnderlyingSize - GetLength<I>();
-    return (value << lshift) >> rshift;
+    constexpr int rshift = GetLocation<I>();
+    constexpr UnderlyingType mask = GetMax<I>();
+    return (value >> rshift) & mask;
   }
 
-  template<int I>
+  template<unsigned I>
   void Set(UnderlyingType elemValue) {
-    constexpr UnderlyingType lshift = UnderlyingSize - GetLength<I>();
-    constexpr UnderlyingType rshift = UnderlyingSize - GetLocation<I>() - GetLength<I>();
-    constexpr UnderlyingType mask = (std::numeric_limits<UnderlyingType>::max() << lshift) >> rshift;
+    assert(CountBit(elemValue) <= GetLength<I>());
+    constexpr int lshift = UnderlyingSize - GetLength<I>();
+    constexpr int rshift = UnderlyingSize - GetLocation<I>() - GetLength<I>();
+    constexpr UnderlyingType mask = static_cast<UnderlyingType>((std::numeric_limits<UnderlyingType>::max() << lshift) >> rshift);
     value = (~mask & value) | ((elemValue << lshift) >> rshift);
   }
 
