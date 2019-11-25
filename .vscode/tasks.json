@@ -6,8 +6,16 @@
             "type": "shell",
             "label": "build a project (debug)",
             "dependsOn": [
-                "cmake install (debug)"
+                "cmake build (debug)"
             ]
+        },
+        {
+            "type": "shell",
+            "label": "cmake build (debug)",
+            "options": {
+                "cwd": "${workspaceRoot}/build"
+            },
+            "command": "cmake --build . --target install --config Debug -v",
         },
         {
             "type": "shell",
