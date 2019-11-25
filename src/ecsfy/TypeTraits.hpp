@@ -46,7 +46,7 @@ constexpr int GetAt() {
 
 template <int... _Values>
 struct CompactTuple {
-  static const int Size = Sum(CountBit(_Values)...);
+  static const int Size = Sum(CountBit(_Values - 1)...);
   static_assert(Size > 0 && Size <= 64);
   using UnderlyingType = typename std::conditional<Size < 8, uint8_t,
                          typename std::conditional<Size < 16, uint16_t,
@@ -58,35 +58,35 @@ struct CompactTuple {
 
   template<int I>
   static constexpr UnderlyingType GetLocation() {
-    return AccSum<I - 1, 0, CountBit(_Values)...>();
+    return AccSum<I - 1, 0, CountBit(_Values - 1)...>();
   }
 
   template<int I>
   static constexpr UnderlyingType GetLength() {
-    return GetAt<I, CountBit(_Values)...>();
+    return GetAt<I, CountBit(_Values - 1)...>();
   }
 
-  template<unsigned I>
+  template<int I>
   static constexpr UnderlyingType GetMax() {
     constexpr int lshift = UnderlyingSize - GetLocation<I>() - GetLength<I>();
     constexpr int rshift = UnderlyingSize - GetLength<I>();
     return static_cast<UnderlyingType>(std::numeric_limits<UnderlyingType>::max() << lshift) >> rshift;
   }
 
-  template<unsigned I>
+  template<int I>
   UnderlyingType Get() const {
     constexpr int rshift = GetLocation<I>();
     constexpr UnderlyingType mask = GetMax<I>();
     return (value >> rshift) & mask;
   }
 
-  template<unsigned I>
+  template<int I>
   void Set(UnderlyingType elemValue) {
     assert(CountBit(elemValue) <= GetLength<I>());
     constexpr int lshift = UnderlyingSize - GetLength<I>();
     constexpr int rshift = UnderlyingSize - GetLocation<I>() - GetLength<I>();
-    constexpr UnderlyingType mask = static_cast<UnderlyingType>((std::numeric_limits<UnderlyingType>::max() << lshift) >> rshift);
-    value = (~mask & value) | ((elemValue << lshift) >> rshift);
+    constexpr UnderlyingType mask = static_cast<UnderlyingType>(std::numeric_limits<UnderlyingType>::max() << lshift) >> rshift;
+    value = (~mask & value) | (static_cast<UnderlyingType>(elemValue << lshift) >> rshift);
   }
 
   UnderlyingType value = 0;
@@ -94,9 +94,9 @@ struct CompactTuple {
 
 template <uint64_t N>
 struct Index {
-  using Type = typename std::conditional<N < 256l, uint8_t,
-               typename std::conditional<N < 65536l, uint16_t,
-               typename std::conditional<N < 65536l * 65536l, uint32_t, uint64_t
+  using Type = typename std::conditional<N <= 256l, uint8_t,
+               typename std::conditional<N <= 65536l, uint16_t,
+               typename std::conditional<N <= 65536l * 65536l, uint32_t, uint64_t
                >::type
                >::type
                >::type;

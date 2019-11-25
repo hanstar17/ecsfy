@@ -2,15 +2,15 @@
 #include "ecsfy/EntityManager.hpp"
 
 struct EntityTraits {
-  static const int MaxEntityCount = 65535; //16 bits
-  static const int MaxTypeCount = 255;     //8 bits
-  static const int MaxGeneration = 15;     //4 bits
+  static const int EntityCount = 65536;  //16 bits
+  static const int TypeCount = 256;      //8 bits
+  static const int GenerationCount = 16; //4 bits
 };
  
 template<typename _Traits>
-using CompactType = ecsfy::CompactTuple<_Traits::MaxEntityCount, 
-                                        _Traits::MaxTypeCount,
-                                        _Traits::MaxGeneration>;
+using CompactType = ecsfy::CompactTuple<_Traits::EntityCount, 
+                                        _Traits::TypeCount,
+                                        _Traits::GenerationCount>;
 int main() {
   ecsfy::EntityManager<EntityTraits> map;
   ecsfy::Handle<EntityTraits> handle;

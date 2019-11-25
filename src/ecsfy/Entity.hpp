@@ -12,9 +12,9 @@ struct Entity {
   };
 
  public:
-  using CompactType = CompactTuple<_Traits::MaxEntityCount, 
-                                   _Traits::MaxTypeCount,
-                                   _Traits::MaxGeneration>;
+  using CompactType = CompactTuple<_Traits::EntityCount,
+                                   _Traits::TypeCount,
+                                   _Traits::GenerationCount>;
   using UnderlyingType = typename CompactType::UnderlyingType;
   
   static constexpr UnderlyingType GetMaxGeneration() { return CompactType::template GetMax<kGeneration>(); }
