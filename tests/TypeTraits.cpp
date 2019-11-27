@@ -71,3 +71,19 @@ TEST_CASE( "test CompactTuple", "[typetraits]" ) {
   REQUIRE( tuple.Get<1>() == 0 );
   REQUIRE( tuple.Get<2>() == 0 );
 }
+
+TEST_CASE( "is in test", "[typetraits]" ) {
+  STATIC_REQUIRE( ecsfy::IsIn<float, int, float, double>() );
+  STATIC_REQUIRE( ecsfy::IsIn<float, float, int, double>() );
+  STATIC_REQUIRE( ecsfy::IsIn<float, int, double, float>() );
+  STATIC_REQUIRE( !ecsfy::IsIn<float, int, double>() );
+  STATIC_REQUIRE( !ecsfy::IsIn<float>() );
+}
+
+TEST_CASE( "is unique sequence test", "[typetraits]" ) {
+  STATIC_REQUIRE( ecsfy::IsUniqueSequence<float, int, double, char>::value );
+  STATIC_REQUIRE( !ecsfy::IsUniqueSequence<float, int, float, char>::value );
+  STATIC_REQUIRE( !ecsfy::IsUniqueSequence<float, int, double, float>::value );
+  STATIC_REQUIRE( ecsfy::IsUniqueSequence<>::value );
+  STATIC_REQUIRE( ecsfy::IsUniqueSequence<float>::value );
+}

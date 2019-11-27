@@ -44,9 +44,30 @@ constexpr int GetAt() {
     return GetAt<_Index - 1, _Rest...>();
 }
 
+namespace {
+template <typename Value, int Index, typename First, typename... Rest>
+constexpr int IndexOfRec() {
+  static_assert(Index >= 0);
+  if constexpr (std::is_same<Value, First>::value)
+    return Index;
+  else if constexpr (sizeof...(Rest) == 0)
+    return -1;
+  else
+    return IndexOfRec<Value, Index + 1, Rest...>();
+}
+}  // namespace
+
+template <typename Value, typename... List>
+constexpr int IndexOf() {
+  if constexpr (sizeof...(List) == 0)
+    return -1;
+  else
+    return IndexOfRec<Value, 0, List...>();
+}
+
 template <int... _Values>
 struct CompactTuple {
-  static const int Size = Sum(CountBit(_Values - 1)...);
+  static constexpr int Size = Sum(CountBit(_Values - 1)...);
   static_assert(Size > 0 && Size <= 64);
   using UnderlyingType = typename std::conditional<Size < 8, uint8_t,
                          typename std::conditional<Size < 16, uint16_t,
@@ -100,5 +121,25 @@ struct Index {
                >::type
                >::type
                >::type;
+};
+
+template <typename Item>
+constexpr bool IsIn() {
+  return false;
+}
+
+template <typename Item, typename First, typename... Rest>
+constexpr bool IsIn() {
+  return std::is_same<Item, First>::value || IsIn<Item, Rest...>();
+}
+
+template <typename... Ts>
+struct IsUniqueSequence : public std::true_type {};
+
+template <typename First, typename Second, typename... Rest>
+struct IsUniqueSequence<First, Second, Rest...> {
+  static constexpr bool value = !std::is_same<First, Second>::value &&
+                            !IsIn<First, Rest...>() &&
+                            IsUniqueSequence<Second, Rest...>::value;
 };
 }
