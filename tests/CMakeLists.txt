@@ -1,4 +1,4 @@
-add_executable(tests Main.cpp Entity.cpp EntityManager.cpp TypeTraits.cpp)
+add_executable(tests Main.cpp Entity.cpp EntityManager.cpp Registry.cpp TypeTraits.cpp)
 
 target_include_directories(tests PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
