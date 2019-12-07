@@ -44,7 +44,7 @@ TEST_CASE( "test CompactTuple", "[typetraits]" ) {
   STATIC_REQUIRE(CompactTuple::GetLength<1>() == 4);
   STATIC_REQUIRE(CompactTuple::GetLength<2>() == 4);
 
-  CompactTuple tuple;
+  CompactTuple tuple{0};
   tuple.Set<0>(0);
   tuple.Set<1>(1);
   tuple.Set<2>(2);
