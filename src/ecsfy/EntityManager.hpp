@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <vector>
 #include "Entity.hpp"
+#include "SlotMap.hpp"
 #include "TypeTraits.hpp"
 
 namespace ecsfy {
@@ -41,59 +42,45 @@ class EntityManager {
   using HandleType = Handle<_EntityTraits>;
   using IndexType = typename EntityType::UnderlyingType;
 
+  struct SlotGetter {
+    IndexType operator()(const EntityType &entity) const { return entity.GetIndex(); }
+  };
+  struct SlotSetter {
+    void operator()(EntityType &entity, IndexType slot) const { return entity.SetIndex(slot); }
+  };
+  using SlotMapType = SlotMap<EntityType, IndexType, SlotGetter, SlotSetter>;
+
  public:
-  EntityType *Get(HandleType handle) {
-    assert(handle.index < entities.size());
-    assert(entities[handle.index].GetGeneration() == handle.generation);
-    return &entities[handle.index];
+  EntityType &Get(HandleType handle) {
+    assert(handle.index < slotmap.GetSlotCount());
+    assert(slotmap[handle.index].GetGeneration() == handle.generation);
+    return slotmap[handle.index];
   }
 
-  HandleType Create() { return HasStale() ? Reuse() : Allocate(); }
+  HandleType Create() {
+    auto [newSlot, slot] = slotmap.Emplace();
 
-  void Destroy(HandleType handle) { Stale(handle); }
+    auto &entity = slotmap[slot];
+    entity.SetTypeID(0);
+    if (newSlot)
+      entity.SetGeneration(1);
 
- private:
-  HandleType Allocate() {
-    assert(entities.size() < _EntityTraits::EntityCount);
-    entities.push_back(EntityType{});
-    entities.back().SetGeneration(1);
-    return {static_cast<typename HandleType::IndexType>(entities.size() - 1),
-            static_cast<typename HandleType::GenerationType>(1)};
+    return {slot, entity.GetGeneration()};
   }
 
-  HandleType Reuse() {
-    assert(HasStale());
-    auto stale = entities[head].GetIndex();
-    auto next = entities[stale].GetIndex();
-    entities[head].SetIndex(next);
-
-    if (stale == tail) tail = head;
-    entities[stale].SetTypeID(0);
-    return {static_cast<typename HandleType::IndexType>(stale),
-            static_cast<typename HandleType::GenerationType>(
-                entities[stale].GetGeneration())};
-  }
-
-  bool HasStale() const { return head != tail; }
-
-  void Stale(HandleType handle) {
-    assert(handle.index < entities.size());
-    assert(handle.generation == entities[handle.index].GetGeneration());
+  void Destroy(HandleType handle) {
+    assert(handle.generation == slotmap[handle.index].GetGeneration());
     if (handle.generation == EntityType::GetMaxGeneration())
       handle.generation = 1;
     else
       ++handle.generation;
-
-    entities[handle.index].SetGeneration(handle.generation);
-
-    entities[tail].SetIndex(handle.index);
-    tail = handle.index;
+    
+    slotmap[handle.index].SetGeneration(handle.generation);
+    slotmap.RemoveAt(handle.index);
   }
 
  private:
-  std::vector<EntityType> entities = {EntityType{0}};
-  IndexType head = 0;
-  IndexType tail = 0;
+  SlotMapType slotmap;
 };
 
 }  // namespace ecsfy
