@@ -110,7 +110,7 @@ struct CompactTuple {
     value = (~mask & value) | (static_cast<UnderlyingType>(elemValue << lshift) >> rshift);
   }
 
-  UnderlyingType value = 0;
+  UnderlyingType value;
 };
 
 template <uint64_t N>
