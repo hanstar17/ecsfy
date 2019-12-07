@@ -3,21 +3,22 @@
 
 TEST_CASE( "test slot map", "[slot map]" ) {
   using SlotMap = ecsfy::SlotMap<unsigned, int>;
-  using ValueType = SlotMap::ValueType;
-  using SlotType = SlotMap::SlotType;
 
   SlotMap slotmap;
-  ValueType a = 1;
-  SlotType aSlot = slotmap.Insert(a);
-  ValueType &aVal = slotmap.Get(aSlot);
 
-  REQUIRE( a == 1 );
+  SECTION( "add." ) {
+    auto [allocated, slot] = slotmap.Emplace(1);
+    REQUIRE( allocated );
+    REQUIRE( slot == 1 );
+    REQUIRE( slotmap[slot] == 1 );
+  }
 
-  slotmap.Erase(aSlot);
-
-  ValueType b = 2;
-  SlotType bSlot = slotmap.Insert(b);
-  REQUIRE( aSlot == bSlot );
-  ValueType &bVal = slotmap.Get(bSlot);
-  REQUIRE( bVal == 2 );
+  SECTION( "add, remove, add." ) {
+    auto [_1, slot1] = slotmap.Emplace(1);
+    slotmap.RemoveAt(slot1);
+    auto [allocated, slot2] = slotmap.Emplace(2);
+    REQUIRE( !allocated );
+    REQUIRE( slot2 == 1 );
+    REQUIRE( slotmap[slot2] == 2 );
+  }
 }

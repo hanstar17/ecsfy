@@ -84,14 +84,11 @@ TEST_CASE( "test manager", "[entity manager]" ) {
   REQUIRE( handles.back().generation == 1 );
 
   // get
-  REQUIRE( manager.Get(handles[0]) );
-  REQUIRE( manager.Get(handles[0])->GetGeneration() == 1 );
+  REQUIRE( manager.Get(handles[0]).GetGeneration() == 1 );
   
-  REQUIRE( manager.Get(handles[1]) );
-  REQUIRE( manager.Get(handles[1])->GetGeneration() == 1 );
+  REQUIRE( manager.Get(handles[1]).GetGeneration() == 1 );
 
-  REQUIRE( manager.Get(handles[2]) );
-  REQUIRE( manager.Get(handles[2])->GetGeneration() == 1 );
+  REQUIRE( manager.Get(handles[2]).GetGeneration() == 1 );
 
   // destroy
   manager.Destroy(handles[0]);

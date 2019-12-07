@@ -40,44 +40,46 @@ class SlotMap {
     return slots[slot];
   }
 
-  template <typename ForwardValueType>
-  SlotType Insert(ForwardValueType &&value) {
-    return HasStale() ? Reuse(std::forward<ForwardValueType>(value))
-                      : Allocate(std::forward<ForwardValueType>(value));
+  const ValueType &operator[](SlotType slot) const { return Get(slot); }
+  ValueType &operator[](SlotType slot) { return Get(slot); }
+
+  template <typename ...Args>
+  std::pair<bool, SlotType> Emplace(Args &&...args) {
+    if (HasStale())
+      return {false, Reuse(std::forward<Args>(args)...)};
+    return {true, Allocate(std::forward<Args>(args)...)};
   }
 
-  void Erase(SlotType slot) { Stale(slot); }
+  void RemoveAt(SlotType slot) { Stale(slot); }
+
+  std::size_t GetSlotCount() const { return slots.size(); }
 
  private:
-  SlotType Allocate(const ValueType &value) {
-    slots.push_back(value);
+  template <typename ...Args>
+  SlotType Allocate(Args &&...args) {
+    slots.emplace_back(std::forward<Args>(args)...);
     return slots.size() - 1;
   }
 
-  SlotType Allocate(ValueType &&value) {
-    slots.push_back(std::move(value));
-    return slots.size() - 1;
-  }
-
-  SlotType Reuse(const ValueType &value) {
+  template <typename ...Args>
+  SlotType Reuse(Args &&...args) {
     assert(HasStale());
     auto stale = GetNextStaleSlot(head);
     auto next = GetNextStaleSlot(stale);
     SetNextStaleSlot(head, next);
 
     if (stale == tail) tail = head;
-    new (&slots[stale]) ValueType(value);
-    return stale;
-  }
-
-  SlotType Reuse(ValueType &&value) {
-    assert(HasStale());
-    auto stale = GetNextStaleSlot(head);
-    auto next = GetNextStaleSlot(stale);
-    SetNextStaleSlot(head, next);
-
-    if (stale == tail) tail = head;
-    new (&slots[stale]) ValueType(std::move(value));
+    
+    // construct.
+    if constexpr (sizeof...(Args) == 0) {
+      if constexpr (!std::is_trivially_constructible<ValueType, Args...>::value)
+        new (&slots[stale]) ValueType();
+    }
+    else {
+      static_assert(std::is_constructible<ValueType, Args...>::value);
+      new (&slots[stale]) ValueType(std::forward<Args>(args)...);
+    }
+    
     return stale;
   }
 
@@ -85,7 +87,8 @@ class SlotMap {
 
   void Stale(SlotType slot) {
     assert(slot < slots.size());
-    slots[slot].~ValueType();
+    if constexpr (!std::is_trivially_destructible<ValueType>::value)
+      slots[slot].~ValueType();
     SetNextStaleSlot(tail, slot);
     tail = slot;
   }
