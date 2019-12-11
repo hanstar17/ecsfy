@@ -72,15 +72,15 @@ TEST_CASE( "test manager", "[entity manager]" ) {
   std::vector<Handle> handles;
   // create test
   handles.push_back(manager.Create());
+  REQUIRE( handles.back().index == 0 );
+  REQUIRE( handles.back().generation == 1 );
+
+  handles.push_back(manager.Create());
   REQUIRE( handles.back().index == 1 );
   REQUIRE( handles.back().generation == 1 );
 
   handles.push_back(manager.Create());
   REQUIRE( handles.back().index == 2 );
-  REQUIRE( handles.back().generation == 1 );
-
-  handles.push_back(manager.Create());
-  REQUIRE( handles.back().index == 3 );
   REQUIRE( handles.back().generation == 1 );
 
   // get
@@ -97,13 +97,13 @@ TEST_CASE( "test manager", "[entity manager]" ) {
 
   // recreate
   handles[0] = manager.Create();
-  REQUIRE( handles[0].index == 1 );
+  REQUIRE( handles[0].index == 0 );
   REQUIRE( handles[0].generation == 2 );
   handles[1] = manager.Create();
-  REQUIRE( handles[1].index == 2 );
+  REQUIRE( handles[1].index == 1 );
   REQUIRE( handles[1].generation == 2 );
   handles[2] = manager.Create();
-  REQUIRE( handles[2].index == 3 );
+  REQUIRE( handles[2].index == 2 );
   REQUIRE( handles[2].generation == 2 );
 
   // generation wraps around
