@@ -2,6 +2,9 @@
 #include "catch2/catch.hpp"
 #include "ScopedProfiler.hpp"
 #include <chrono>
+#include <thread>
+#include <array>
+#include <vector>
 
 template <unsigned CN, unsigned IN>
 struct ArraysOfComponents {
@@ -73,60 +76,53 @@ void AccessQuaterCompact(C &container) {
   }
 }
 
-static constexpr int kComponentCount = 30;
-static constexpr int kItemCount = 10000000;
+template <typename _Container, std::size_t N, typename _Func, typename... _Args>
+void TestSequential(const char *tag, std::array<_Container, N> &containers, _Func func, _Args&&... args) {
+  ScopedProfiler s(tag);
+  for (auto &c : containers) {
+    func(c, std::forward(args)...);
+  }
+}
+
+template <typename _Container, std::size_t N, typename _Func, typename... _Args>
+void TestParallel(const char *tag, std::array<_Container, N> &containers, _Func func, _Args &&... args) {
+  ScopedProfiler s(tag);
+  std::vector<std::thread> threads; threads.reserve(N);
+  for (auto &c : containers) {
+    threads.push_back(std::thread(func, std::ref(c), std::forward(args)...));
+  }
+  for (auto &t : threads) {
+    t.join();
+  }
+}
+
+static constexpr int kComponentCount = 20;
+static constexpr int kItemCount = 1000000;
+static constexpr int kBlockCount = 7;
 
 using A = ArraysOfComponents<kComponentCount, kItemCount>;
 using B = ArrayOfStructs<kComponentCount, kItemCount>;
 
-A a;
-B b;
+std::array<A, kBlockCount> as;
+std::array<B, kBlockCount> bs;
 TEST_CASE( "access patterns and loops", "[profile]" ) {
-  SECTION("access one") {
-    {
-        ScopedProfiler s("access one a");
-        AccessOne(a);
-    }
+  TestSequential("AccessOne A", as, AccessOne<A>);
+  TestSequential("AccessOne B", bs, AccessOne<B>);
+  TestParallel("AccessOne A (p)", as, AccessOne<A>);
+  TestParallel("AccessOne B (p)", bs, AccessOne<B>);
 
-    {
-        ScopedProfiler s("access one b");
-        AccessOne(b);
-    }
-  }
+  TestSequential("AccessAll A", as, AccessAll<A>);
+  TestSequential("AccessAll B", bs, AccessAll<B>);
+  TestParallel("AccessAll A (p)", as, AccessAll<A>);
+  TestParallel("AccessAll B (p)", bs, AccessAll<B>);
 
-  SECTION("access all") {
-    {
-        ScopedProfiler s("access all b");
-        AccessAll(a);
-    }
+  TestSequential("AccessQuaterCompact A", as, AccessQuaterCompact<A>);
+  TestSequential("AccessQuaterCompact B", bs, AccessQuaterCompact<B>);
+  TestParallel("AccessQuaterCompact A (p)", as, AccessQuaterCompact<A>);
+  TestParallel("AccessQuaterCompact B (p)", bs, AccessQuaterCompact<B>);
 
-    {
-        ScopedProfiler s("access all b");
-        AccessAll(b);
-    }
-  }
-
-  SECTION("access quater compact") {
-    {
-        ScopedProfiler s("access quater a");
-        AccessQuaterCompact(a);
-    }
-
-    {
-        ScopedProfiler s("access quater b");
-        AccessQuaterCompact(b);
-    }
-  }
-
-  SECTION("access quater sparse") {
-    {
-        ScopedProfiler s("access quater sparse a");
-        AccessQuaterSparse(a);
-    }
-
-    {
-        ScopedProfiler s("access quater sparse b");
-        AccessQuaterSparse(b);
-    }
-  }
+  TestSequential("AccessQuaterSparse A", as, AccessQuaterSparse<A>);
+  TestSequential("AccessQuaterSparse B", bs, AccessQuaterSparse<B>);
+  TestParallel("AccessQuaterSparse A (p)", as, AccessQuaterSparse<A>);
+  TestParallel("AccessQuaterSparse B (p)", bs, AccessQuaterSparse<B>);
 }
