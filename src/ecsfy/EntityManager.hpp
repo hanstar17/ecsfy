@@ -50,7 +50,7 @@ class EntityManager {
   struct SlotSetter {
     void operator()(EntityType &entity, IndexType slot) const { return entity.SetIndex(slot); }
   };  
-  using SlotMapType = SlotMap<EntityType, IndexType, SlotGetter, SlotSetter>;
+  using SlotMapType = SlotMap<IndexType, EntityType, SlotGetter, SlotSetter>;
 
  public:
   EntityType &Get(HandleType handle) {
