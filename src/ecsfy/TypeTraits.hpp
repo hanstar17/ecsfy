@@ -58,10 +58,8 @@ constexpr int IndexOfRec() {
 
 template <typename Value, typename... List>
 constexpr int IndexOf() {
-  if constexpr (sizeof...(List) == 0)
-    return -1;
-  else
-    return IndexOfRec<Value, 0, List...>();
+  static_assert(sizeof...(List) > 0);
+  return IndexOfRec<Value, 0, List...>();
 }
 
 template <int... _Values>

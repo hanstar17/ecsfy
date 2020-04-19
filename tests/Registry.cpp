@@ -14,7 +14,6 @@ TEST_CASE( "component registry", "[registry]" ) {
     STATIC_REQUIRE( ComponentRegistry::GetIndex<char>() == 2 );
     STATIC_REQUIRE( ComponentRegistry::GetIndex<unsigned>() == 3 );
     STATIC_REQUIRE( ComponentRegistry::GetIndex<unsigned char>() == 4 );
-    STATIC_REQUIRE( ComponentRegistry::GetIndex<std::string>() == -1 );
   }
 
   SECTION( "check component's size." ) {
