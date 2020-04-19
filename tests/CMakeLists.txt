@@ -3,7 +3,7 @@ add_executable(tests
   CompositeStorage.cpp 
   Entity.cpp 
   EntityManager.cpp 
-  Profile.cpp
+  # Profile.cpp
   Registry.cpp 
   ScopedProfiler.cpp
   SlotMap.cpp 
