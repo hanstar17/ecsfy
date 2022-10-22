@@ -78,7 +78,9 @@
       "thread": "cpp",
       "variant": "cpp",
       "filesystem": "cpp",
-      "__memory": "cpp"
+      "__memory": "cpp",
+      "condition_variable": "cpp",
+      "queue": "cpp"
     },
     "cmake.configureOnOpen": true
 }

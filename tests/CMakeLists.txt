@@ -3,6 +3,8 @@ add_executable(tests
   CompositeStorage.cpp 
   Entity.cpp 
   EntityManager.cpp 
+  Messenger.t.cpp 
+  Messenger.cpp 
   # Profile.cpp
   Registry.cpp 
   ScopedProfiler.cpp
